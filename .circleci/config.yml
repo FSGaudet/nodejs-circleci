@@ -1,6 +1,33 @@
 version: 2.1
 jobs:
   run_tests:
+    # On what container to run it
     docker:
+      # Which image that has dependencies you are required to run your code in the command
       - image: circleci/node:10
-      
+    #The steps you want to go though
+    steps:
+      #Alias to git clone your new code of your project
+      - checkout
+      # Run block do what you need to do
+      - run:
+        # Here the name of your command, you can name it the way you want
+          name: Install npm dependencies
+          command: |
+            npm install --save
+      - run:
+          name: Run Unit Tests
+          #We are just basicaly calling mocha
+          command: |
+            ./node_modules/mocha/bin/mocha test/ --reporter mochawesome --reporter-options reportDir=test-results,reportFilename=test-results
+      # Grab everything in that folder and show in the test result
+      - store_test_results:
+          path: test-results
+      # Grab the file and attach them to the build to access in different way
+      - store_artifacts:
+          path: test-results
+  #Tell circleci in what order to do the jobs and which order     
+workflows:
+   build_test:
+     jobs:
+       - run_tests
